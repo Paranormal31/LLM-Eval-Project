@@ -1,0 +1,34 @@
+# Important Folder (Requested to be ignored)
+Importants/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Databases
+*.db
+*.sqlite
+
+# IDEs
+.vscode/
+.idea/

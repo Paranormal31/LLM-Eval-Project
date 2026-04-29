@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+motor
+groq
+python-dotenv
+pydantic
