@@ -9,6 +9,7 @@ venv/
 .venv/
 env/
 .env
+.env.local
 
 # Node.js
 node_modules/
@@ -32,3 +33,6 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
+
+# Local Netlify folder
+.netlify

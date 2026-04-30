@@ -55,7 +55,7 @@ export default function Datasets() {
         } catch(e) {}
       }
 
-      await axios.post("http://localhost:8000/api/batch-run", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/batch-run`, {
         prompts: prompts,
         models: activeModels,
         custom_criteria: criteria

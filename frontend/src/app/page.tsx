@@ -61,6 +61,16 @@ function DashboardContent() {
   );
   const [compareModels, setCompareModels] = useState<string[]>([]);
 
+  // Suppress noisy Recharts ResponsiveContainer warnings in the terminal
+  useEffect(() => {
+    const originalError = console.error;
+    console.error = (...args: any[]) => {
+      if (typeof args[0] === 'string' && args[0].includes('width(-1) and height(-1)')) return;
+      originalError(...args);
+    };
+    return () => { console.error = originalError; };
+  }, []);
+
   useEffect(() => {
     fetchRuns();
   }, []);
@@ -81,7 +91,7 @@ function DashboardContent() {
 
   const fetchRuns = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/runs");
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/runs`);
       setRuns(res.data);
     } catch (error) {
       console.error("Failed to fetch runs:", error);
@@ -111,7 +121,7 @@ function DashboardContent() {
         const prompts = newPrompt.split(",").map(p => p.trim()).filter(p => p);
         if (prompts.length > 1) {
           // Run batch evaluation
-          await axios.post("http://localhost:8000/api/batch-run", {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/batch-run`, {
             prompts,
             models: activeModels,
             custom_criteria: criteria
@@ -124,7 +134,7 @@ function DashboardContent() {
       }
       
       // Fallback to normal if not csv formatted
-      await axios.post("http://localhost:8000/api/run", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/run`, {
         prompt: newPrompt,
         models: activeModels,
         custom_criteria: criteria
@@ -142,7 +152,7 @@ function DashboardContent() {
     if (!editingScores || !selectedRun) return;
     setIsSubmittingOverride(true);
     try {
-      await axios.post(`http://localhost:8000/api/runs/${selectedRun.run_id}/override`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/runs/${selectedRun.run_id}/override`, {
         model: editingScores.model,
         prompt: editingScores.prompt,
         new_evaluation: { ...tempScores, reasoning: "Admin Override" }
@@ -151,7 +161,7 @@ function DashboardContent() {
       // Immediately refetch to show updated data
       await fetchRuns();
       // Update the selectedRun to show the new data without closing the modal
-      const res = await axios.get(`http://localhost:8000/api/runs/${selectedRun.run_id}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/runs/${selectedRun.run_id}`);
       setSelectedRun(res.data);
     } catch (error) {
       console.error("Failed to submit override", error);
@@ -407,10 +417,10 @@ function DashboardContent() {
                   return (
                     <div className="flex flex-col h-full w-full">
                       <div className="grid grid-cols-3 gap-4 flex-1">
-                        <div className="col-span-1 flex flex-col h-full border border-blue-900/30 bg-blue-950/10 rounded-lg p-2 pt-4">
+                        <div className="col-span-1 flex flex-col border border-blue-900/30 bg-blue-950/10 rounded-lg p-2 pt-4">
                           <h4 className="text-xs font-semibold text-blue-400 text-center mb-2 uppercase tracking-wider">Cloud (Groq)</h4>
-                          <div className="flex-1">
-                            <ResponsiveContainer width="100%" height="100%">
+                          <div style={{ height: 200 }}>
+                            <ResponsiveContainer width="100%" height={200}>
                               <BarChart data={cloudData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                                 <XAxis dataKey="name" stroke="#a1a1aa" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
@@ -423,10 +433,10 @@ function DashboardContent() {
                             </ResponsiveContainer>
                           </div>
                         </div>
-                        <div className="col-span-2 flex flex-col h-full border border-green-900/30 bg-green-950/10 rounded-lg p-2 pt-4">
+                        <div className="col-span-2 flex flex-col border border-green-900/30 bg-green-950/10 rounded-lg p-2 pt-4">
                           <h4 className="text-xs font-semibold text-green-400 text-center mb-2 uppercase tracking-wider">Local (Ollama)</h4>
-                          <div className="flex-1">
-                            <ResponsiveContainer width="100%" height="100%">
+                          <div style={{ height: 200 }}>
+                            <ResponsiveContainer width="100%" height={200}>
                               <BarChart data={localData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                                 <XAxis dataKey="name" stroke="#a1a1aa" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
@@ -502,10 +512,10 @@ function DashboardContent() {
                     return (
                       <div className="flex flex-col h-full w-full">
                         <div className="grid grid-cols-3 gap-4 flex-1">
-                          <div className="col-span-1 flex flex-col h-full border border-pink-900/30 bg-pink-950/10 rounded-lg p-2 pt-4">
+                          <div className="col-span-1 flex flex-col border border-pink-900/30 bg-pink-950/10 rounded-lg p-2 pt-4">
                             <h4 className="text-xs font-semibold text-pink-400 text-center mb-2 uppercase tracking-wider">Cloud (Groq)</h4>
-                            <div className="flex-1">
-                              <ResponsiveContainer width="100%" height="100%">
+                            <div style={{ height: 200 }}>
+                              <ResponsiveContainer width="100%" height={200}>
                                 <LineChart data={cloudData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                                   <XAxis dataKey="name" stroke="#a1a1aa" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
@@ -518,10 +528,10 @@ function DashboardContent() {
                               </ResponsiveContainer>
                             </div>
                           </div>
-                          <div className="col-span-2 flex flex-col h-full border border-orange-900/30 bg-orange-950/10 rounded-lg p-2 pt-4">
+                          <div className="col-span-2 flex flex-col border border-orange-900/30 bg-orange-950/10 rounded-lg p-2 pt-4">
                             <h4 className="text-xs font-semibold text-orange-400 text-center mb-2 uppercase tracking-wider">Local (Ollama)</h4>
-                            <div className="flex-1">
-                              <ResponsiveContainer width="100%" height="100%">
+                            <div style={{ height: 200 }}>
+                              <ResponsiveContainer width="100%" height={200}>
                                 <LineChart data={localData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                                   <XAxis dataKey="name" stroke="#a1a1aa" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
